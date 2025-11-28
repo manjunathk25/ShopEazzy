@@ -1,13 +1,13 @@
 package com.shopEZ.ShopEazzy.controller;
 
-import com.shopEZ.ShopEazzy.model.Category;
+import com.shopEZ.ShopEazzy.config.AppConstants;
+import com.shopEZ.ShopEazzy.payload.CategoryDTO;
+import com.shopEZ.ShopEazzy.payload.CategoryResponse;
 import com.shopEZ.ShopEazzy.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -20,27 +20,30 @@ public class CategoryController {
     }
 
     @GetMapping("/public/categories")
-    public ResponseEntity<List<Category>> getCategories(){
+    public ResponseEntity<CategoryResponse> getCategories(@RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+                                                          @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+                                                          @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_CATEGORY_BY, required = false) String sortBy,
+                                                          @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder){
         return ResponseEntity.status(HttpStatus.OK)
-                .body(categoryService.getAllCategories());
+                .body(categoryService.getAllCategories(pageNumber, pageSize, sortBy, sortOrder));
     }
 
     @PostMapping("/admin/category")
-    public ResponseEntity<String> createNewCategory(@Valid @RequestBody Category category){
+    public ResponseEntity<CategoryDTO> createNewCategory(@Valid @RequestBody CategoryDTO categoryDTO){
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(categoryService.createNewCategory(category));
+                .body(categoryService.createNewCategory(categoryDTO));
     }
 
     @DeleteMapping("/admin/categories/{categoryId}")
-    public ResponseEntity<String> deleteCategory(@PathVariable long categoryId){
-        String status = categoryService.deleteCategory(categoryId);
-        return ResponseEntity.status(HttpStatus.OK).body(status);
+    public ResponseEntity<CategoryDTO> deleteCategory(@PathVariable long categoryId){
+        CategoryDTO categoryDTO = categoryService.deleteCategory(categoryId);
+        return ResponseEntity.status(HttpStatus.OK).body(categoryDTO);
     }
 
     @PutMapping("/admin/categories/{categoryId}")
-    public ResponseEntity<String> updateCategory(@PathVariable long categoryId,
-                                 @Valid @RequestBody Category category){
-        String status = categoryService.updateCategory(categoryId, category);
-        return ResponseEntity.status(HttpStatus.OK).body(status);
+    public ResponseEntity<CategoryDTO> updateCategory(@PathVariable long categoryId,
+                                 @Valid @RequestBody CategoryDTO categoryDTO){
+        CategoryDTO categoryDTO1 = categoryService.updateCategory(categoryId, categoryDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(categoryDTO1);
     }
 }

@@ -1,17 +1,16 @@
 package com.shopEZ.ShopEazzy.service;
 
-import com.shopEZ.ShopEazzy.model.Category;
-
-import java.util.List;
+import com.shopEZ.ShopEazzy.payload.CategoryDTO;
+import com.shopEZ.ShopEazzy.payload.CategoryResponse;
 
 public interface CategoryService {
 
-    List<Category> getAllCategories();
+    CategoryResponse getAllCategories(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 
-    String createNewCategory(Category category);
+    CategoryDTO createNewCategory(CategoryDTO categoryDTO);
 
-    String deleteCategory(Long categoryId);
+    CategoryDTO deleteCategory(Long categoryId);
 
-    String updateCategory(Long categoryId, Category category);
+    CategoryDTO updateCategory(Long categoryId, CategoryDTO categoryDTO);
 
 }
