@@ -5,11 +5,14 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@Table(name = "products")
 public class Product {
 
     @Id
@@ -41,4 +44,8 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "categoryId")
     private Category category;
+
+    @ManyToOne
+    @JoinColumn(name = "sellerId")
+    private User user;
 }
