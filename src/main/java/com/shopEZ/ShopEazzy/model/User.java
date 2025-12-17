@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,7 +12,10 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @Table(name = "users",
         uniqueConstraints = {
@@ -37,7 +38,7 @@ public class User {
     private String email;
 
     @NotBlank(message = "Password must not be blank.")
-    @Size(max=50, message = "Password must contain at most 50 characters.")
+    @Size(max=120)
     private String password;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE},
@@ -58,4 +59,10 @@ public class User {
                 cascade = {CascadeType.PERSIST, CascadeType.MERGE},
                 orphanRemoval = true)
     private Set<Product> products;
+
+    public User(String userName, String email, String password) {
+        this.userName = userName;
+        this.email = email;
+        this.password = password;
+    }
 }
