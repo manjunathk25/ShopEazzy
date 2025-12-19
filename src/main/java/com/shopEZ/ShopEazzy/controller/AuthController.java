@@ -12,7 +12,9 @@ import com.shopEZ.ShopEazzy.security.response.MessageResponse;
 import com.shopEZ.ShopEazzy.security.response.UserInfoResponse;
 import com.shopEZ.ShopEazzy.security.service.CustomUserDetails;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,10 +23,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -46,7 +45,7 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @PostMapping("/signin")
+    @PostMapping("/sign_in")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest){
 
         Authentication authentication;
@@ -65,7 +64,7 @@ public class AuthController {
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        String token = jwtUtils.generateTokenFromUserName(userDetails);
+        ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
         List<String> authorities = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
@@ -73,10 +72,11 @@ public class AuthController {
         UserInfoResponse userInfoResponse = new UserInfoResponse(
                 userDetails.getUserId(),
                 userDetails.getUsername(),
-                token,
                 authorities);
 
-        return ResponseEntity.status(HttpStatus.OK).body(userInfoResponse);
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .body(userInfoResponse);
     }
 
     @PostMapping("/signup")
@@ -128,5 +128,36 @@ public class AuthController {
         userRepository.save(user);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new MessageResponse("User registered successfully!"));
+    }
+
+    @GetMapping("/username")
+    public String getUserName(Authentication authentication){
+        return authentication != null ?
+                authentication.getName() : "";
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<UserInfoResponse> getUserDetails(Authentication authentication){
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        List<String> authorities = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
+        UserInfoResponse userInfoResponse = new UserInfoResponse(
+                userDetails.getUserId(),
+                userDetails.getUsername(),
+                authorities
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(userInfoResponse);
+    }
+
+    @GetMapping("sign_out")
+    public ResponseEntity<?> logoutUser(){
+
+        ResponseCookie cookie = jwtUtils.cleanJwtCookie();
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(new MessageResponse("You've been signed out successfully."));
     }
 }

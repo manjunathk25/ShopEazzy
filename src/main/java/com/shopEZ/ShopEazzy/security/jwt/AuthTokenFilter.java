@@ -32,7 +32,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                                     @Nullable FilterChain filterChain) throws ServletException, IOException {
 
         try {
-            String jwtToken = jwtUtils.getTokenFromHeader(request);
+            String jwtToken = jwtUtils.getTokenFromCookie(request);
             System.out.println("Jwt token: " + jwtToken);
             if(jwtToken != null && jwtUtils.isTokenValid(jwtToken)){
                 String userName = jwtUtils.generateUserNameFromToken(jwtToken);
